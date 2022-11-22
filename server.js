@@ -3,8 +3,6 @@ const dotenv = require('dotenv');
 //Route files
 const bootcamp = require('./routes/bootcamps');
 
-const {flatten} = require("express/lib/utils");
-
 //Load env vars
 dotenv.config({path:'./config/config.env'});
 
