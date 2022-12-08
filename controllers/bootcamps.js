@@ -58,20 +58,25 @@ exports.createBootcamp = asyncHandler(async (req, res, next)=>{
 //@route    PUT /api/v1/bootcamps/:id
 //@access   Private
 exports.updateBootcamp = asyncHandler(async (req, res, next)=>{
-        const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body,{
-            new:true,
-            runValidators:true
-        });
-        if (bootcamp){
-            res.status(201).json({
-                success:true,
-                data:bootcamp
-            })
-        }
-        else{
+        let bootcamp = await Bootcamp.findById(req.params.id);
+        if (!bootcamp){
             return next(new ErrorResponse(`Resource not found id of ${req.params.id}`, 404));
         }
 
+        //Make sure user is bootcamp owner
+        if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin'){
+            return next(new ErrorResponse(`User ${req.user.id} not authorized to update ${req.params.id} bootcamp`, 401));
+        }
+
+        bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+            new:true,
+            runValidators:true
+        })
+
+        res.status(201).json({
+            success:true,
+            data:bootcamp
+        })
 });
 
 //@desc     deletes a bootcamp
@@ -79,16 +84,19 @@ exports.updateBootcamp = asyncHandler(async (req, res, next)=>{
 //@access   Private
 exports.deleteBootcamp = asyncHandler(async (req, res, next)=>{
         const bootcamp = await Bootcamp.findById(req.params.id);
-        if (bootcamp){
-            bootcamp.remove();
-            res.status(200).json({
-                success:true,
-                data: {}
-            })
-        }
-        else{
+
+        if (!bootcamp){
             return next(new ErrorResponse(`Resource not found id of ${req.params.id}`, 404));
         }
+        //Make sure user is bootcamp owner
+        if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin'){
+            return next(new ErrorResponse(`User ${req.user.id} not authorized to delete ${req.params.id} bootcamp`, 401));
+        }
+        bootcamp.remove();
+        res.status(200).json({
+            success:true,
+            data: {}
+        })
 });
 
 //@desc     get bootcamps within a radius
