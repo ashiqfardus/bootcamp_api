@@ -27,9 +27,9 @@ const reviews = JSON.parse(fs.readFileSync(`${__dirname}/_data/reviews.json`,'ut
 //Import into DB
 const importData = async ()=>{
     try{
-        // await Bootcamp.create(bootcamps);
-        // await Course.create(courses);
-        // await User.create(users);
+        await Bootcamp.create(bootcamps);
+        await Course.create(courses);
+        await User.create(users);
         await Review.create(reviews);
         console.log('Data seeded'.green.inverse);
         process.exit();
