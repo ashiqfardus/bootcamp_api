@@ -1,5 +1,5 @@
 const express = require('express');
-const {getReviews,getReview} = require('../controllers/reviews');
+const {getReviews,getReview,createReview} = require('../controllers/reviews');
 
 const advancedResults = require('../middleware/advancedResults');
 const router = express.Router({mergeParams:true});
@@ -13,7 +13,8 @@ router
         advancedResults(Review,{
         path:'bootcamp',
         select:'name description'
-        }), getReviews);
+        }), getReviews)
+    .post(protect,authorize('user','admin'),createReview);
 
 router
     .route('/:id')
