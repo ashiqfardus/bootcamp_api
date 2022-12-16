@@ -7,7 +7,13 @@ const errorHandler = require('./middleware/error');
 const fileupload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+
 const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const rateLimit = require("express-rate-limit");
+const hpp = require("hpp");
+const cors = require("cors");
 
 //Load env vars
 dotenv.config({path:'./config/config.env'});
@@ -21,6 +27,7 @@ const course = require('./routes/courses');
 const auth = require('./routes/auth');
 const user = require('./routes/users');
 const reviews = require('./routes/reviews');
+const {query} = require("express");
 
 const app = express();
 
@@ -39,6 +46,25 @@ if (process.env.NODE_ENV==='development'){
 app.use(fileupload());
 // To remove data using these defaults:
 app.use(mongoSanitize());
+//XSS protection
+app.use(helmet());
+
+//prevent XSS attacks
+app.use(xss());
+
+//Rate limiting
+const limiter = rateLimit({
+   windowMs:10*60*1000, //10 mins
+   max:1000
+});
+
+app.use(limiter);
+
+//PREVENT HTTP PARAM pollution
+app.use(hpp());
+
+//Enable CORS
+app.use(cors());
 
 //set static folder
 app.use(express.static(path.join(__dirname, 'public')));
